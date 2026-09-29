@@ -1,10 +1,20 @@
-const API_BASE = window.__API_BASE__ || localStorage.getItem('kushal_blog_api_url') || (['localhost', '127.0.0.1'].includes(window.location.hostname) ? 'http://localhost:3001/api' : '/api');
+const LIVE_RENDER_BACKEND = 'https://medium-blog-jygn.onrender.com';
+const LIVE_RENDER_API = `${LIVE_RENDER_BACKEND}/api`;
+
+const API_BASE = (() => {
+  if (window.__API_BASE__) return window.__API_BASE__;
+  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  const stored = localStorage.getItem('kushal_blog_api_url');
+  if (stored) return stored;
+  return ['localhost', '127.0.0.1'].includes(window.location.hostname) ? 'http://localhost:3001/api' : LIVE_RENDER_API;
+})();
 
 function getBackendBase() {
   if (window.__BACKEND_URL__) return window.__BACKEND_URL__;
+  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_BACKEND_URL) return import.meta.env.VITE_BACKEND_URL;
   const stored = localStorage.getItem('kushal_blog_api_url');
   if (stored) return stored.replace(/\/api\/?$/, '');
-  return ['localhost', '127.0.0.1'].includes(window.location.hostname) ? 'http://localhost:3001' : '';
+  return ['localhost', '127.0.0.1'].includes(window.location.hostname) ? 'http://localhost:3001' : LIVE_RENDER_BACKEND;
 }
 
 // ============ Router ============
@@ -56,18 +66,38 @@ class Router {
 }
 
 // ============ API ============
+async function fetchWithFallback(path) {
+  let url = `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
+  try {
+    const res = await fetch(url);
+    if (res.ok) return await res.json();
+    throw new Error(`HTTP ${res.status}`);
+  } catch (err) {
+    const fallbackBase = API_BASE.includes('localhost') ? LIVE_RENDER_API : 'http://localhost:3001/api';
+    try {
+      const fbRes = await fetch(`${fallbackBase}${path.startsWith('/') ? '' : '/'}${path}`);
+      if (fbRes.ok) return await fbRes.json();
+    } catch {
+      // ignore
+    }
+    throw err;
+  }
+}
+
 async function fetchPosts() {
-  const res = await fetch(`${API_BASE}/posts`);
-  if (!res.ok) throw new Error('Failed to fetch posts');
-  const data = await res.json();
-  return Array.isArray(data.posts) ? data.posts : (Array.isArray(data) ? data : []);
+  try {
+    const data = await fetchWithFallback('/posts');
+    return Array.isArray(data.posts) ? data.posts : (Array.isArray(data) ? data : []);
+  } catch (e) {
+    console.warn('fetchPosts fallback notice:', e);
+    return [];
+  }
 }
 
 async function fetchCurated() {
   try {
-    const res = await fetch(`${API_BASE}/curated`);
-    if (!res.ok) throw new Error('Failed to fetch curated');
-    return await res.json();
+    const data = await fetchWithFallback('/curated');
+    return data;
   } catch {
     const all = await fetchPosts();
     return { hero: all[0] || null, pinned: [], recent: all.slice(1, 10), all };
@@ -75,36 +105,41 @@ async function fetchCurated() {
 }
 
 async function fetchPaginatedPosts(page = 1, limit = 9, tag = null) {
-  let url = `${API_BASE}/posts?page=${page}&limit=${limit}`;
-  if (tag) url += `&tag=${encodeURIComponent(tag)}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Failed to fetch posts');
-  return await res.json();
+  let endpoint = `/posts?page=${page}&limit=${limit}`;
+  if (tag) endpoint += `&tag=${encodeURIComponent(tag)}`;
+  return await fetchWithFallback(endpoint);
 }
 
 async function fetchPost(slug) {
   const cleanSlug = encodeURIComponent(slug);
-  let res = await fetch(`${API_BASE}/posts/${cleanSlug}`);
-  if (!res.ok && cleanSlug !== slug) {
-    res = await fetch(`${API_BASE}/posts/${slug}`);
+  try {
+    const data = await fetchWithFallback(`/posts/${cleanSlug}`);
+    return data.post;
+  } catch (e) {
+    if (cleanSlug !== slug) {
+      const data = await fetchWithFallback(`/posts/${slug}`);
+      return data.post;
+    }
+    throw e;
   }
-  if (!res.ok) throw new Error('Post not found');
-  const data = await res.json();
-  return data.post;
 }
 
 async function searchPosts(query) {
-  const res = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}`);
-  if (!res.ok) throw new Error('Search failed');
-  const data = await res.json();
-  return data.posts;
+  try {
+    const data = await fetchWithFallback(`/search?q=${encodeURIComponent(query)}`);
+    return data.posts || [];
+  } catch {
+    return [];
+  }
 }
 
 async function fetchTags() {
-  const res = await fetch(`${API_BASE}/tags`);
-  if (!res.ok) throw new Error('Failed to fetch tags');
-  const data = await res.json();
-  return data.tags;
+  try {
+    const data = await fetchWithFallback('/tags');
+    return data.tags || [];
+  } catch {
+    return [];
+  }
 }
 
 async function fetchProfile() {
@@ -752,12 +787,13 @@ async function renderHomePage() {
   main.innerHTML = renderLoading();
 
   try {
-    const [{ hero, pinned, recent, all }, tags, homepage, projectsData] = await Promise.all([
-      fetchCurated(),
-      fetchTags(),
-      fetchHomepage(),
-      fetchProjects()
+    const [curatedData, tags, homepage, projectsData] = await Promise.all([
+      fetchCurated().catch(() => ({ hero: null, pinned: [], recent: [], all: [] })),
+      fetchTags().catch(() => []),
+      fetchHomepage().catch(() => ({})),
+      fetchProjects().catch(() => ({ projects: [] }))
     ]);
+    const { hero, pinned, recent, all } = curatedData || { hero: null, pinned: [], recent: [], all: [] };
 
     const showHero = homepage.showHero !== false;
     const heroLabel = homepage.heroLabel || 'Stories & Ideas';

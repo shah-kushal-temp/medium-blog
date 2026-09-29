@@ -654,6 +654,117 @@ app.get('/api/posts', async (req, res) => {
   }
 });
 
+// Curated Homepage Stories for Reader (Hero + Pinned + Top Recent)
+app.get('/api/curated', async (req, res) => {
+  try {
+    let posts = [];
+    if (getIsConnected()) {
+      posts = await Post.find({ published: true })
+        .sort({ isHero: -1, isPinned: -1, pinOrder: 1, createdAt: -1 })
+        .limit(20)
+        .lean();
+    } else {
+      const data = readPosts();
+      posts = data.posts.filter(p => p.published).sort((a, b) => {
+        if (a.isHero && !b.isHero) return -1;
+        if (!a.isHero && b.isHero) return 1;
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        if (a.isPinned && b.isPinned) return (a.pinOrder || 0) - (b.pinOrder || 0);
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+    }
+
+    const cleaned = posts.map(({ rawContent, content, ...rest }) => ({
+      ...rest,
+      contentPreview: content ? content.replace(/<[^>]*>/g, '').substring(0, 280) : '',
+    }));
+
+    const hero = cleaned.find(p => p.isHero) || cleaned[0] || null;
+    const pinned = cleaned.filter(p => p.isPinned && (!hero || p.id !== hero.id));
+    const recent = cleaned.filter(p => (!hero || p.id !== hero.id) && !p.isPinned);
+
+    res.json({ hero, pinned, recent, all: cleaned });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve curated posts' });
+  }
+});
+
+// Get all unique tags for Reader
+app.get('/api/tags', async (req, res) => {
+  try {
+    let sourcePosts = [];
+    if (getIsConnected()) {
+      sourcePosts = await Post.find({ published: true }).lean();
+    } else {
+      sourcePosts = readPosts().posts.filter(p => p.published);
+    }
+
+    const map = new Map();
+    sourcePosts.forEach(p => {
+      if (Array.isArray(p.tags)) {
+        p.tags.forEach(t => {
+          const clean = (t || '').trim();
+          if (!clean) return;
+          const lower = clean.toLowerCase();
+          if (!map.has(lower)) {
+            map.set(lower, clean);
+          }
+        });
+      }
+    });
+    res.json({ tags: Array.from(map.values()) });
+  } catch (err) {
+    res.json({ tags: [] });
+  }
+});
+
+// Search posts
+app.get('/api/search', async (req, res) => {
+  const query = (req.query.q || '').toLowerCase().trim();
+  if (!query) return res.json({ posts: [] });
+
+  try {
+    let sourcePosts = [];
+    if (getIsConnected()) {
+      sourcePosts = await Post.find({ published: true }).lean();
+    } else {
+      sourcePosts = readPosts().posts.filter(p => p.published);
+    }
+
+    const results = sourcePosts
+      .filter(p => {
+        return (
+          (p.title && p.title.toLowerCase().includes(query)) ||
+          (p.subtitle && p.subtitle.toLowerCase().includes(query)) ||
+          (p.tags && p.tags.some(t => t.toLowerCase().includes(query))) ||
+          (p.content && p.content.replace(/<[^>]*>/g, '').toLowerCase().includes(query))
+        );
+      })
+      .map(({ rawContent, content, ...rest }) => ({
+        ...rest,
+        contentPreview: content
+          ? content.replace(/<[^>]*>/g, '').substring(0, 280)
+          : '',
+      }))
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    res.json({ posts: results });
+  } catch (err) {
+    res.json({ posts: [] });
+  }
+});
+
+// Get homepage config
+app.get('/api/homepage', (req, res) => {
+  try {
+    const data = JSON.parse(fs.readFileSync(HOMEPAGE_FILE, 'utf-8'));
+    res.json({ success: true, homepage: data });
+  } catch {
+    res.json({ success: true, homepage: DEFAULT_HOMEPAGE });
+  }
+});
+
 // Curation Endpoints: Get & Update Homepage Hero & Pinned Order
 app.get('/api/curation', async (req, res) => {
   try {
