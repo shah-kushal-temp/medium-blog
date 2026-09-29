@@ -56,6 +56,14 @@ function readPosts() {
   }
 }
 
+function writePosts(data) {
+  try {
+    fs.writeFileSync(POSTS_FILE, JSON.stringify(data, null, 2));
+  } catch (e) {
+    console.warn('writePosts error:', e.message);
+  }
+}
+
 const DEFAULT_PROFILE = {
   name: "Kushal Shah",
   tagline: "Software Engineer, Writer & Open Source Enthusiast",
@@ -380,6 +388,70 @@ app.get('/api/projects', (req, res) => {
     res.json({ success: true, ...data });
   } catch {
     res.json({ success: true, githubUsername: '', showGithubLink: true, projects: [] });
+  }
+});
+
+// Fallback handlers for editor write operations (prevents 404 if editor contacts port 3001)
+app.post('/api/posts', async (req, res) => {
+  try {
+    const { title, subtitle, content, tags, coverImage, coverColor, matchCoverBackground, published } = req.body;
+    const postTitle = (title && title.trim()) ? title.trim() : 'Untitled';
+    const htmlContent = content || '<p><br></p>';
+    const post = {
+      id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      title: postTitle,
+      subtitle: subtitle || '',
+      slug: postTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+      author: 'Kushal Shah',
+      coverImage: coverImage || '',
+      coverColor: coverColor || '',
+      matchCoverBackground: matchCoverBackground !== undefined ? Boolean(matchCoverBackground) : true,
+      tags: Array.isArray(tags) ? tags : [],
+      content: htmlContent,
+      rawContent: htmlContent,
+      rawFile: '',
+      originalFileName: '',
+      fileType: 'html',
+      readTime: Math.max(1, Math.ceil(htmlContent.replace(/<[^>]*>/g, '').split(/\s+/).length / 200)),
+      published: Boolean(published),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    const data = readPosts();
+    data.posts.unshift(post);
+    writePosts(data);
+    if (getIsConnected()) {
+      try { await Post.create(post); } catch (e) {}
+    }
+    res.json({ success: true, post });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create post' });
+  }
+});
+
+app.put('/api/posts/:id', async (req, res) => {
+  try {
+    const data = readPosts();
+    const index = data.posts.findIndex(p => p.id === req.params.id);
+    if (index === -1) return res.status(404).json({ error: 'Post not found' });
+    const { title, subtitle, content, tags, coverImage, coverColor, matchCoverBackground, published } = req.body;
+    const post = data.posts[index];
+    if (title !== undefined) post.title = title;
+    if (subtitle !== undefined) post.subtitle = subtitle;
+    if (content !== undefined) post.content = content;
+    if (tags !== undefined) post.tags = tags;
+    if (coverImage !== undefined) post.coverImage = coverImage;
+    if (coverColor !== undefined) post.coverColor = coverColor;
+    if (matchCoverBackground !== undefined) post.matchCoverBackground = matchCoverBackground;
+    if (published !== undefined) post.published = Boolean(published);
+    post.updatedAt = new Date().toISOString();
+    writePosts(data);
+    if (getIsConnected()) {
+      try { await Post.findOneAndUpdate({ id: req.params.id }, post, { upsert: true }); } catch (e) {}
+    }
+    res.json({ success: true, post });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update post' });
   }
 });
 

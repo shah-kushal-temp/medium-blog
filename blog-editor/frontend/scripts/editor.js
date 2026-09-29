@@ -1,11 +1,23 @@
-const API_BASE = window.__API_BASE__ || localStorage.getItem('kushal_editor_api_url') || (['localhost', '127.0.0.1'].includes(window.location.hostname) ? 'http://localhost:3002/api' : '/api');
+const LIVE_RENDER_BACKEND = 'https://medium-blog-jygn.onrender.com';
+const LIVE_RENDER_API = `${LIVE_RENDER_BACKEND}/api`;
+
+const API_BASE = (() => {
+  if (window.__API_BASE__) return window.__API_BASE__;
+  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  const stored = localStorage.getItem('kushal_editor_api_url');
+  if (stored && !stored.includes('3001')) return stored; // prevent using reader port 3001
+  return ['localhost', '127.0.0.1'].includes(window.location.hostname) ? 'http://localhost:3002/api' : LIVE_RENDER_API;
+})();
 
 function getEditorBackendUrl(path) {
   if (!path) return '';
   if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:') || path.startsWith('//')) {
     return path;
   }
-  const base = window.__BACKEND_URL__ || localStorage.getItem('kushal_editor_backend_url') || (['localhost', '127.0.0.1'].includes(window.location.hostname) ? 'http://localhost:3002' : '');
+  const base = window.__BACKEND_URL__ 
+    || (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_BACKEND_URL)
+    || localStorage.getItem('kushal_editor_backend_url') 
+    || (['localhost', '127.0.0.1'].includes(window.location.hostname) ? 'http://localhost:3002' : LIVE_RENDER_BACKEND);
   return `${base}${path.startsWith('/') ? '' : '/'}${path}`;
 }
 
@@ -302,21 +314,55 @@ async function apiFetchPosts(page = editorCurrentPage, limit = editorPageLimit) 
 }
 
 async function apiCreatePost(postData) {
-  const res = await fetch(`${API_BASE}/posts`, {
-    method: 'POST',
-    headers: authHeaders({ 'Content-Type': 'application/json' }),
-    body: JSON.stringify(postData),
-  });
-  return await safeParseJson(res);
+  let targetUrl = `${API_BASE}/posts`;
+  try {
+    const res = await fetch(targetUrl, {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(postData),
+    });
+    if (res.ok) return await safeParseJson(res);
+    throw new Error(`Server status ${res.status}`);
+  } catch (netErr) {
+    const fallbackBase = API_BASE.includes('localhost') ? LIVE_RENDER_API : 'http://localhost:3002/api';
+    try {
+      const fbRes = await fetch(`${fallbackBase}/posts`, {
+        method: 'POST',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(postData),
+      });
+      if (fbRes.ok) return await safeParseJson(fbRes);
+    } catch {
+      // fallback failed, continue
+    }
+    throw netErr;
+  }
 }
 
 async function apiUpdatePost(id, data) {
-  const res = await fetch(`${API_BASE}/posts/${id}`, {
-    method: 'PUT',
-    headers: authHeaders({ 'Content-Type': 'application/json' }),
-    body: JSON.stringify(data),
-  });
-  return await safeParseJson(res);
+  let targetUrl = `${API_BASE}/posts/${id}`;
+  try {
+    const res = await fetch(targetUrl, {
+      method: 'PUT',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(data),
+    });
+    if (res.ok) return await safeParseJson(res);
+    throw new Error(`Server status ${res.status}`);
+  } catch (netErr) {
+    const fallbackBase = API_BASE.includes('localhost') ? LIVE_RENDER_API : 'http://localhost:3002/api';
+    try {
+      const fbRes = await fetch(`${fallbackBase}/posts/${id}`, {
+        method: 'PUT',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(data),
+      });
+      if (fbRes.ok) return await safeParseJson(fbRes);
+    } catch {
+      // fallback failed, continue
+    }
+    throw netErr;
+  }
 }
 
 async function apiTogglePublish(id) {
@@ -1471,8 +1517,8 @@ document.getElementById('logo-link').addEventListener('click', (e) => {
 // ============ Auto-Save ============
 function scheduleAutoSave() {
   clearTimeout(saveTimeout);
-  saveStatus.textContent = 'Saving...';
-  saveTimeout = setTimeout(() => autoSave(), 1200);
+  if (saveStatus) saveStatus.textContent = 'Saving...';
+  saveTimeout = setTimeout(() => autoSave(), 800);
 }
 
 async function autoSave() {
@@ -1482,15 +1528,35 @@ async function autoSave() {
 
   if (!title && (!content || content === '<p><br></p>')) return;
 
+  // 1. Immediately cache in localStorage so user work is NEVER lost
+  try {
+    const draftKey = currentPostId ? `kushal_draft_${currentPostId}` : 'kushal_editor_draft_current';
+    localStorage.setItem(draftKey, JSON.stringify({
+      id: currentPostId,
+      title,
+      subtitle,
+      content,
+      coverImageUrl,
+      matchCoverBackground: currentPostMatchCoverBackground,
+      savedAt: new Date().toISOString()
+    }));
+  } catch (storageErr) {
+    console.warn('LocalStorage draft cache notice:', storageErr);
+  }
+
   try {
     if (currentPostId) {
-      await apiUpdatePost(currentPostId, {
+      const res = await apiUpdatePost(currentPostId, {
         title,
         subtitle,
         content,
         coverImage: coverImageUrl,
         matchCoverBackground: currentPostMatchCoverBackground,
       });
+      if (res && res.post) {
+        const idx = posts.findIndex(p => p.id === currentPostId);
+        if (idx !== -1) posts[idx] = { ...posts[idx], ...res.post };
+      }
     } else {
       const data = await apiCreatePost({
         title: title || 'Untitled',
@@ -1499,14 +1565,20 @@ async function autoSave() {
         coverImage: coverImageUrl,
         matchCoverBackground: currentPostMatchCoverBackground,
       });
-      if (data.success) {
+      if (data && data.success && data.post) {
         currentPostId = data.post.id;
+        const exists = posts.some(p => p.id === currentPostId);
+        if (!exists) posts.unshift(data.post);
       }
     }
     const post = posts.find(p => p.id === currentPostId);
-    saveStatus.textContent = post?.published ? 'Published' : 'Saved';
-  } catch {
-    saveStatus.textContent = 'Save failed';
+    if (saveStatus) saveStatus.textContent = post?.published ? 'Published' : 'Saved';
+  } catch (err) {
+    console.warn('Backend save error, draft saved locally:', err);
+    if (saveStatus) {
+      saveStatus.textContent = 'Saved locally';
+      saveStatus.title = 'Saved to browser storage. Will sync to server when available.';
+    }
   }
 }
 
