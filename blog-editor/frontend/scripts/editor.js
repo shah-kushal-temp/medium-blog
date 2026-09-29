@@ -27,8 +27,8 @@ let activeBlock = null;
 let currentPostMatchCoverBackground = true;
 
 // ============ Cloudinary Config ============
-let CLOUDINARY_CLOUD_NAME = localStorage.getItem('cloudinary_cloud_name') || '';
-let CLOUDINARY_UPLOAD_PRESET = localStorage.getItem('cloudinary_upload_preset') || '';
+let CLOUDINARY_CLOUD_NAME = localStorage.getItem('cloudinary_cloud_name') || (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_CLOUDINARY_CLOUD_NAME) || '';
+let CLOUDINARY_UPLOAD_PRESET = localStorage.getItem('cloudinary_upload_preset') || (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET) || '';
 let CLOUDINARY_ENABLED = localStorage.getItem('cloudinary_enabled') !== 'false' && !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_UPLOAD_PRESET);
 
 function isCloudinaryActive() {
