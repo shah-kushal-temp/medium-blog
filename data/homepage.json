@@ -1,0 +1,19 @@
+{
+  "heroLabel": "Stories & Ideas",
+  "heroTitle": "Welcome to Stories",
+  "heroAccent": "Stories",
+  "heroSubtitle": "Thoughts on technology, development, and life — curated articles and deep engineering breakdowns.",
+  "ctaText": "Browse All Stories",
+  "ctaLink": "#/stories/1",
+  "showHero": true,
+  "showTags": true,
+  "showTrending": true,
+  "footerText": "Stories, technical writings & engineering ideas",
+  "footerSub": "Explore articles on modern software engineering",
+  "secondaryCtaText": "Explore Projects",
+  "secondaryCtaLink": "#/projects",
+  "storiesTitle": "Curated & Recent Stories",
+  "projectsTitle": "Featured Projects & Open Source",
+  "projectsSubtitle": "Software applications, developer tools, and open source contributions.",
+  "showProjects": true
+}

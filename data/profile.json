@@ -1,0 +1,29 @@
+{
+  "name": "Kushal Shah",
+  "tagline": "Software Engineer, Writer & Open Source Enthusiast",
+  "bio": "Writing about modern web technologies, distributed systems, clean code, and engineering architecture.",
+  "about": "Hi! I am Kushal Shah, a software engineer passionate about building high-performance systems and writing clean code. I created this personal blog to share practical knowledge, deep-dive tutorials, and architecture breakdowns.",
+  "avatar": "",
+  "links": [
+    {
+      "id": "1",
+      "label": "GitHub",
+      "url": "https://github.com"
+    },
+    {
+      "id": "2",
+      "label": "Twitter / X",
+      "url": "https://twitter.com"
+    },
+    {
+      "id": "3",
+      "label": "LinkedIn",
+      "url": "https://linkedin.com"
+    },
+    {
+      "id": "4",
+      "label": "Google",
+      "url": "https://google.com"
+    }
+  ]
+}

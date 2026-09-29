@@ -1,0 +1,433 @@
+/* ========================================
+   Code Block Styling (highlight.js inspired)
+   ======================================== */
+
+.post-content code {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace !important;
+  font-size: 0.85em;
+  background: var(--color-bg-secondary);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  color: #d63384;
+  border: 1px solid var(--color-border-light);
+}
+
+.post-content pre {
+  margin: var(--spacing-xl) 0;
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  background: #1e1e2e;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow-md);
+}
+
+.post-content pre code {
+  display: block;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace !important;
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: #cdd6f4;
+  background: transparent;
+  border: none;
+  overflow-x: auto;
+}
+
+/* ========================================================
+   Modern Matte Dark Code Block (ChatGPT / Claude / v0 Style)
+   ======================================================== */
+.post-content .code-block-wrapper {
+  margin: 32px 0;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #18181b !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.post-content .code-block-wrapper:hover {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* Island White Theme (When toggled via button) */
+.post-content .code-block-wrapper.theme-island-white {
+  background: #ffffff !important;
+  border: 1px solid #d0d7de !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Seamless Header - No divider line */
+.post-content .code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px 6px 20px;
+  background: transparent !important;
+  border-bottom: none !important;
+  user-select: none;
+}
+
+.post-content .code-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.post-content .code-file-icon {
+  color: #a1a1aa;
+  flex-shrink: 0;
+}
+
+.post-content .code-lang-title {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: #f4f4f5;
+  text-transform: uppercase;
+}
+
+.post-content .code-block-wrapper.theme-island-white .code-lang-title {
+  color: #1f2328;
+}
+
+.post-content .code-block-wrapper.theme-island-white .code-file-icon {
+  color: #57606a;
+}
+
+/* Header Action Buttons: </>, ▷, ⎘ */
+.post-content .code-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.post-content .code-action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #d4d4d8;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+
+.post-content .code-action-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.post-content .code-action-btn:active {
+  transform: translateY(0);
+}
+
+/* The first button (</>) has a subtle dark circular container like in screenshot */
+.post-content .code-action-btn.code-format-btn,
+.post-content .code-action-btn:first-child {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.post-content .code-action-btn.code-format-btn:hover,
+.post-content .code-action-btn:first-child:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+/* Copy Button */
+.post-content .code-copy-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: #d4d4d8;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all var(--transition-fast);
+}
+
+.post-content .code-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.post-content .code-copy-btn.copied {
+  background: rgba(34, 197, 94, 0.2) !important;
+  color: #4ade80 !important;
+}
+
+/* Island White Button Overrides */
+.post-content .code-block-wrapper.theme-island-white .code-action-btn {
+  color: #57606a;
+}
+
+.post-content .code-block-wrapper.theme-island-white .code-action-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #1f2328;
+}
+
+.post-content .code-block-wrapper.theme-island-white .code-action-btn.code-format-btn {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.post-content .code-block-wrapper.theme-island-white .code-copy-btn.copied {
+  background: #e8f5e8 !important;
+  color: #1a8917 !important;
+}
+
+/* Pre & Code */
+.post-content .code-block-wrapper pre {
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 4px 22px 22px 22px !important;
+  overflow-x: auto;
+}
+
+.post-content .code-block-wrapper pre code {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Cascadia Code', monospace !important;
+  font-size: 14.5px !important;
+  line-height: 1.7 !important;
+  color: #ffffff !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  display: block;
+  tab-size: 2;
+  white-space: pre;
+}
+
+.post-content .code-block-wrapper.wrap-lines pre code {
+  white-space: pre-wrap !important;
+  word-break: break-word;
+}
+
+.post-content .code-block-wrapper.theme-island-white pre code {
+  color: #1f2328 !important;
+}
+
+/* ========================================
+   Video Embeds in Post Content
+   ======================================== */
+.post-content .video-embed {
+  margin: 36px 0;
+  width: 100%;
+}
+
+.post-content .video-responsive {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 ratio */
+  height: 0;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  background: #000;
+}
+
+.post-content .video-responsive iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* ========================================
+   Embed Link Cards in Post Content
+   ======================================== */
+.post-content .embed-card-wrapper {
+  margin: 32px 0;
+}
+
+.post-content .embed-card {
+  display: block;
+  padding: 20px 24px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-secondary);
+  text-decoration: none !important;
+  transition: all var(--transition-fast);
+}
+
+.post-content .embed-card:hover {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.post-content .embed-card-title {
+  font-family: var(--font-sans);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.post-content .embed-card-desc {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-bottom: 10px;
+  word-break: break-all;
+}
+
+.post-content .embed-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-accent);
+}
+
+/* Modern High-Contrast Syntax Highlighting Matching Screenshot */
+.post-content pre code .hljs-comment,
+.post-content pre code .hljs-quote {
+  color: #71717a !important;
+  font-style: italic;
+}
+
+.post-content pre code .hljs-tag,
+.post-content pre code .hljs-name,
+.post-content pre code .hljs-selector-tag,
+.post-content pre code .hljs-keyword {
+  color: #38bdf8 !important;
+  font-weight: 500;
+}
+
+.post-content pre code .hljs-string,
+.post-content pre code .hljs-addition {
+  color: #6ee7b7 !important;
+}
+
+.post-content pre code .hljs-number,
+.post-content pre code .hljs-literal {
+  color: #fb923c !important;
+}
+
+.post-content pre code .hljs-built_in {
+  color: #f472b6 !important;
+}
+
+.post-content pre code .hljs-type,
+.post-content pre code .hljs-class .hljs-title {
+  color: #fde047 !important;
+}
+
+.post-content pre code .hljs-function .hljs-title,
+.post-content pre code .hljs-title.function_ {
+  color: #60a5fa !important;
+}
+
+.post-content pre code .hljs-attr,
+.post-content pre code .hljs-attribute {
+  color: #7dd3fc !important;
+}
+
+.post-content pre code .hljs-variable,
+.post-content pre code .hljs-template-variable {
+  color: #f472b6 !important;
+}
+
+.post-content pre code .hljs-params {
+  color: #e4e4e7 !important;
+}
+
+.post-content pre code .hljs-regexp {
+  color: #f472b6 !important;
+}
+
+.post-content pre code .hljs-deletion {
+  color: #ef4444 !important;
+}
+
+.post-content pre code .hljs-meta {
+  color: #38bdf8 !important;
+}
+
+.post-content pre code .hljs-symbol,
+.post-content pre code .hljs-bullet {
+  color: #f472b6 !important;
+}
+
+.post-content pre code .hljs-link {
+  color: #38bdf8 !important;
+  text-decoration: underline;
+}
+
+.post-content pre code .hljs-emphasis {
+  font-style: italic;
+}
+
+.post-content pre code .hljs-strong {
+  font-weight: bold;
+}
+
+/* ========================================================
+   Island White Syntax Theme Overrides (GitHub Light / Crisp)
+   ======================================================== */
+.code-block-wrapper.theme-island-white pre code .hljs-comment,
+.code-block-wrapper.theme-island-white pre code .hljs-quote {
+  color: #6e7781 !important;
+  font-style: italic;
+}
+
+.code-block-wrapper.theme-island-white pre code .hljs-keyword,
+.code-block-wrapper.theme-island-white pre code .hljs-selector-tag {
+  color: #cf222e !important;
+  font-weight: 600;
+}
+
+.code-block-wrapper.theme-island-white pre code .hljs-string,
+.code-block-wrapper.theme-island-white pre code .hljs-addition {
+  color: #0a3069 !important;
+}
+
+.code-block-wrapper.theme-island-white pre code .hljs-number,
+.code-block-wrapper.theme-island-white pre code .hljs-literal {
+  color: #0550ae !important;
+}
+
+.code-block-wrapper.theme-island-white pre code .hljs-built_in,
+.code-block-wrapper.theme-island-white pre code .hljs-type,
+.code-block-wrapper.theme-island-white pre code .hljs-class .hljs-title {
+  color: #953800 !important;
+}
+
+.code-block-wrapper.theme-island-white pre code .hljs-function .hljs-title,
+.code-block-wrapper.theme-island-white pre code .hljs-title.function_ {
+  color: #8250df !important;
+}
+
+.code-block-wrapper.theme-island-white pre code .hljs-attr,
+.code-block-wrapper.theme-island-white pre code .hljs-attribute {
+  color: #116329 !important;
+}
+
+.code-block-wrapper.theme-island-white pre code .hljs-variable,
+.code-block-wrapper.theme-island-white pre code .hljs-params,
+.code-block-wrapper.theme-island-white pre code .hljs-template-variable {
+  color: #24292f !important;
+}
+
+.code-block-wrapper.theme-island-white pre code .hljs-tag {
+  color: #116329 !important;
+}
+

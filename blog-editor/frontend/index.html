@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stories — Write</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <!-- Highlight.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="/styles/editor.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- ===== Top Navigation (Stories List view) ===== -->
+      <nav class="topnav" id="topnav-stories">
+        <div class="topnav-inner">
+          <a href="#" class="topnav-logo" id="logo-link">
+            <span class="logo-mark">M</span>
+            <span class="logo-label">Stories</span>
+          </a>
+          <div class="topnav-actions">
+            <button class="nav-tab-btn active" id="btn-nav-stories">Stories</button>
+            <button class="nav-tab-btn" id="btn-nav-projects">Projects</button>
+            <button class="nav-tab-btn" id="btn-nav-curate">Hero & Curation</button>
+            <button class="nav-tab-btn" id="btn-nav-profile">Profile</button>
+            <a href="http://localhost:5173" target="_blank" class="topnav-link" title="View published blog">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              View Blog
+            </a>
+            <button class="btn-theme-toggle" id="btn-theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+              <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+              <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+            <!-- Profile Circle with Hover Logout Popup -->
+            <div class="nav-profile-menu-wrapper" id="nav-profile-menu-wrapper">
+              <button type="button" class="nav-profile-circle-btn" id="btn-profile-circle" title="Account & Profile" aria-label="Author Profile & Menu">
+                <img id="nav-profile-avatar-img" class="nav-profile-avatar-img" src="" alt="Profile" style="display:none;" />
+                <span id="nav-profile-avatar-initials" class="nav-profile-avatar-initials">KS</span>
+              </button>
+              <div class="nav-profile-dropdown" id="nav-profile-dropdown">
+                <div class="nav-profile-dropdown-card">
+                  <div class="nav-profile-dropdown-header" id="nav-dropdown-open-profile" style="cursor: pointer;" title="Open Profile">
+                    <div class="nav-profile-dropdown-avatar">
+                      <img id="dropdown-avatar-img" class="dropdown-avatar-img" src="" alt="Profile" style="display:none;" />
+                      <span id="dropdown-avatar-initials" class="dropdown-avatar-initials">KS</span>
+                    </div>
+                    <div class="nav-profile-dropdown-user">
+                      <div class="nav-profile-dropdown-name" id="dropdown-profile-name">Kushal Shah</div>
+                      <div class="nav-profile-dropdown-tagline" id="dropdown-profile-tagline">Author & Engineer</div>
+                    </div>
+                  </div>
+                  <div class="nav-profile-dropdown-divider"></div>
+                  <div class="nav-profile-dropdown-links">
+                    <button type="button" class="nav-profile-dropdown-item" id="btn-dropdown-profile">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                      Profile Settings
+                    </button>
+                    <button type="button" class="nav-profile-dropdown-item" id="btn-dropdown-write">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+                      Write Story
+                    </button>
+                  </div>
+                  <div class="nav-profile-dropdown-divider"></div>
+                  <button type="button" class="nav-profile-dropdown-item danger" id="btn-dropdown-logout">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <span id="dropdown-logout-text">Log out</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <!-- ===== Top Navigation (Editor view) ===== -->
+      <nav class="topnav topnav-editor" id="topnav-editor" style="display:none">
+        <div class="topnav-inner">
+          <div class="editor-nav-left">
+            <button class="topnav-back" id="btn-back-to-stories" title="Back to stories">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5m0 0 7 7m-7-7 7-7"/></svg>
+            </button>
+            <div class="editor-save-status" id="save-status">Draft</div>
+          </div>
+
+          <!-- Centered Formatting Toolbar for Editor (Always Visible Bold, Italic, Headings, etc.) -->
+          <div class="editor-formatting-toolbar" id="editor-formatting-toolbar">
+            <button type="button" class="format-btn" data-command="bold" title="Bold (Ctrl+B)"><strong>B</strong></button>
+            <button type="button" class="format-btn" data-command="italic" title="Italic (Ctrl+I)"><em>I</em></button>
+            <button type="button" class="format-btn" data-command="strikethrough" title="Strikethrough"><s>S</s></button>
+            <span class="format-divider"></span>
+            <button type="button" class="format-btn" data-command="h2" title="Large Heading"><strong>H1</strong></button>
+            <button type="button" class="format-btn" data-command="h3" title="Sub Heading"><strong>H2</strong></button>
+            <span class="format-divider"></span>
+            <button type="button" class="format-btn" data-command="blockquote" title="Quote Block">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>
+            </button>
+            <button type="button" class="format-btn" data-command="link" title="Insert Link (Ctrl+K)">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            </button>
+            <button type="button" class="format-btn" data-command="code" title="Inline Code">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </button>
+            <span class="format-divider"></span>
+            <button type="button" class="format-btn" data-command="insertUnorderedList" title="Bullet List">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
+            <button type="button" class="format-btn" data-command="insertOrderedList" title="Numbered List">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+            </button>
+          </div>
+
+          <div class="topnav-actions">
+            <button class="btn-theme-toggle" id="btn-theme-toggle-editor" title="Toggle dark mode" aria-label="Toggle dark mode">
+              <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+              <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+            <button class="btn-ghost-sm" id="btn-import">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Import
+            </button>
+            <button class="btn-publish" id="btn-publish">Publish</button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- ===== Stories List View ===== -->
+      <main class="stories-view" id="stories-view">
+        <div class="stories-container">
+          <div class="stories-header">
+            <h1 class="stories-title">Your stories</h1>
+            <button class="btn-write" id="btn-stories-write">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+              Write a story
+            </button>
+          </div>
+
+          <!-- All Views Switcher Put In All, Drafts, and Published Line -->
+          <div class="stories-tabs-bar">
+            <div class="stories-tabs">
+              <button class="tab active" data-filter="all" id="tab-all">All</button>
+              <button class="tab" data-filter="drafts" id="tab-drafts">Drafts</button>
+              <button class="tab" data-filter="published" id="tab-published">Published</button>
+            </div>
+            <div class="stories-tabs-right">
+              <button type="button" class="stories-select-all-toggle" id="stories-select-all-toggle" title="Select all visible stories">
+                <span class="select-all-icon" id="select-all-icon">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span class="select-all-text">Select all</span>
+              </button>
+              <div class="view-switcher" id="editor-view-switcher" title="Change layout view">
+                <button type="button" class="view-switch-btn active" data-view="list" title="List View" aria-label="List view">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                </button>
+                <button type="button" class="view-switch-btn" data-view="grid" title="Grid View" aria-label="Grid view">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                </button>
+                <button type="button" class="view-switch-btn" data-view="compact" title="Compact View" aria-label="Compact view">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Floating Bulk Action Bar -->
+          <div class="bulk-actions-bar" id="bulk-actions-bar" style="display:none;">
+            <div class="bulk-actions-inner">
+              <div class="bulk-actions-left">
+                <span class="bulk-selected-badge" id="bulk-selected-count">0 stories selected</span>
+              </div>
+              <div class="bulk-actions-right">
+                <button type="button" class="btn-bulk-op btn-bulk-publish" id="btn-bulk-publish" title="Publish selected stories">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  <span>Publish</span>
+                </button>
+                <button type="button" class="btn-bulk-op btn-bulk-draft" id="btn-bulk-draft" title="Revert selected stories to draft">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                  <span>Revert to Draft</span>
+                </button>
+                <button type="button" class="btn-bulk-op btn-bulk-delete" id="btn-bulk-delete" title="Delete selected stories">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  <span>Delete</span>
+                </button>
+                <button type="button" class="btn-bulk-clear" id="btn-bulk-clear" title="Deselect all">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="stories-list" id="stories-list"></div>
+
+          <!-- Pagination Bar for Editor Stories -->
+          <div class="editor-pagination" id="editor-pagination" style="display:flex; align-items:center; justify-content:space-between; margin-top:32px; padding:18px 0; border-top:1px solid var(--border); flex-wrap:wrap; gap:12px;"></div>
+        </div>
+      </main>
+
+      <!-- ===== Hero & Curation View ===== -->
+      <main class="curate-view" id="curate-view" style="display:none">
+        <div class="curate-container" style="max-width: 900px; margin: 0 auto; padding: 40px 24px;">
+          <div class="profile-header" style="margin-bottom: 28px;">
+            <h1 class="profile-title">Homepage Hero & Story Arrangement</h1>
+            <p class="profile-subtitle">Choose which story takes the prominent Hero spot on your homepage, and re-order your pinned stories (1st, 2nd, 3rd...). Pinned stories appear at the top on the blog without any pin icon displayed to readers.</p>
+          </div>
+
+          <!-- Hero Story Section -->
+          <div class="profile-card" style="margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+              <div>
+                <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 4px 0; color: var(--text);">👑 Hero Story (Homepage Feature)</h3>
+                <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">This story is featured at the very top of your homepage with a large banner.</p>
+              </div>
+              <span id="curate-hero-badge" style="display:none; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: rgba(26,137,23,0.12); color: var(--green);">Active Hero</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="curate-hero-select">Select Hero Story</label>
+              <select class="form-input" id="curate-hero-select" style="cursor: pointer;">
+                <option value="">-- Choose a published story to feature as Hero --</option>
+              </select>
+            </div>
+
+            <!-- Hero Preview Card -->
+            <div id="curate-hero-preview" style="display:none; margin-top: 16px; padding: 18px; border: 1.5px solid var(--border); border-radius: 14px; background: var(--bg-secondary);"></div>
+          </div>
+
+          <!-- Pinned Stories Ordering Section -->
+          <div class="profile-card">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 4px 0; color: var(--text);">📌 Pinned & Curated Stories (Order First, Second, Third...)</h3>
+                <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Arrange the exact sequence of stories below the Hero. Readers will see them in this custom order without pin badges.</p>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <select class="form-input" id="curate-pin-add-select" style="width: auto; max-width: 280px; padding: 8px 12px; font-size: 13px;">
+                  <option value="">+ Select story to Pin...</option>
+                </select>
+                <button type="button" class="btn-ghost-sm" id="btn-add-pin-story" style="padding: 8px 16px; font-weight: 600;">+ Pin Story</button>
+              </div>
+            </div>
+
+            <div id="curate-pinned-list" class="curate-pinned-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 16px;"></div>
+
+            <div style="margin-top: 24px; display: flex; align-items: center; gap: 16px;">
+              <button type="button" class="btn-publish-final" id="btn-save-curation" style="width: auto; padding: 10px 28px;">Save Homepage Layout</button>
+              <span id="curate-save-status" style="font-size: 13px; font-weight: 600; color: var(--green);"></span>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ===== Projects Management & GitHub Sync View ===== -->
+      <main class="projects-view" id="projects-view" style="display:none">
+        <div class="curate-container" style="max-width: 960px; margin: 0 auto; padding: 40px 24px;">
+          <div class="profile-header" style="margin-bottom: 28px;">
+            <h1 class="profile-title">Projects Showcase</h1>
+            <p class="profile-subtitle">Add any project simply by pasting its GitHub URL, or manage custom projects and showcase them on your website.</p>
+          </div>
+
+          <!-- Quick Add from GitHub URL -->
+          <div class="profile-card" style="margin-bottom: 24px;">
+            <div style="border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 18px;">
+              <h3 style="font-size: 17px; font-weight: 700; margin: 0 0 4px 0; color: var(--text);">⚡ Add Project via GitHub URL</h3>
+              <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Paste any GitHub repository link (e.g. <code>https://github.com/facebook/react</code> or <code>owner/repo</code>). We automatically fetch the project title, description, stars, tech stack, and links.</p>
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <input type="text" class="form-input" id="proj-quick-url" placeholder="Paste GitHub Repository URL (e.g. https://github.com/facebook/react or owner/repo)" style="flex: 1; min-width: 260px; height: 44px; font-size: 14px;" />
+              <button type="button" class="btn-publish-final" id="btn-quick-add-project" style="width: auto; height: 44px; padding: 0 24px; font-size: 14px; white-space: nowrap;">
+                + Add Project
+              </button>
+            </div>
+            <div id="proj-quick-status" style="font-size: 13px; font-weight: 600; margin-top: 10px; min-height: 18px;"></div>
+          </div>
+
+          <!-- Public GitHub Profile Link (Optional) -->
+          <div class="profile-card" style="margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+              <div style="flex: 1; min-width: 240px;">
+                <label class="form-label" for="proj-github-username" style="margin-bottom: 4px; font-size: 13.5px;">Public GitHub Profile Button (Optional)</label>
+                <input type="text" class="form-input" id="proj-github-username" placeholder="Your GitHub Profile URL or Username (e.g. kushalshah)" style="font-size: 13px; padding: 8px 12px;" />
+              </div>
+              <div style="display: flex; align-items: center; gap: 14px; margin-top: 16px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13.5px;">
+                  <input type="checkbox" id="proj-github-show" checked />
+                  <span>Show GitHub button on public site</span>
+                </label>
+                <button type="button" class="btn-ghost-sm" id="btn-save-github-link" style="padding: 7px 16px; font-size: 13px; font-weight: 600;">Save Link</button>
+              </div>
+            </div>
+            <span id="proj-github-save-status" style="font-size: 12.5px; font-weight: 600; color: var(--green); display: block; margin-top: 6px;"></span>
+          </div>
+
+          <!-- Projects Listed on Website (with View Switcher) -->
+          <div class="profile-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid var(--border); padding-bottom: 14px; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <h3 style="font-size: 17px; font-weight: 700; margin: 0 0 4px 0; color: var(--text);">🚀 Projects Listed on Website</h3>
+                <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">These projects are currently live and visible to readers on your public website.</p>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <!-- Project Views Switcher -->
+                <div class="feed-view-switcher" id="projects-editor-view-switcher">
+                  <button class="feed-view-btn active" data-view="grid" title="Grid View" aria-label="Grid view">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                  </button>
+                  <button class="feed-view-btn" data-view="list" title="List View" aria-label="List view">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                  </button>
+                  <button class="feed-view-btn" data-view="compact" title="Compact View" aria-label="Compact view">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                  </button>
+                </div>
+                <button type="button" class="btn-publish-final" id="btn-open-add-project" style="width: auto; padding: 8px 18px; font-size: 13.5px;">+ Add Custom Project</button>
+              </div>
+            </div>
+
+            <div id="projects-editor-list" class="projects-editor-container view-grid">
+              <p style="color: var(--text-secondary); font-size: 14px;">Loading projects...</p>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ===== Profile Settings View ===== -->
+      <main class="profile-view" id="profile-view" style="display:none">
+        <div class="profile-container">
+          <div class="profile-header">
+            <h1 class="profile-title">Author Profile</h1>
+            <p class="profile-subtitle">Update your personal bio, profile picture, social media, and custom links.</p>
+          </div>
+
+          <div class="profile-card">
+            <!-- Avatar Upload -->
+            <div class="profile-avatar-row">
+              <div class="profile-avatar-preview" id="profile-avatar-preview">
+                <span id="profile-avatar-initials">KS</span>
+                <img id="profile-avatar-img" src="" alt="Avatar" style="display:none;" />
+              </div>
+              <div class="profile-avatar-actions">
+                <button type="button" class="btn-ghost-sm" id="btn-upload-avatar">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  Upload photo
+                </button>
+                <button type="button" class="btn-ghost-sm danger" id="btn-remove-avatar" style="display:none">Remove</button>
+                <input type="file" id="profile-avatar-input" accept="image/*" style="display:none;" />
+              </div>
+            </div>
+
+            <!-- Form fields -->
+            <div class="form-group">
+              <label class="form-label" for="profile-name">Full Name</label>
+              <input type="text" class="form-input" id="profile-name" placeholder="Your name (e.g. Kushal Shah)" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="profile-tagline">Tagline / Headline</label>
+              <input type="text" class="form-input" id="profile-tagline" placeholder="Software Engineer & Writer" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="profile-bio">Short Bio (Displayed on cards and under stories)</label>
+              <textarea class="form-input form-textarea" id="profile-bio" rows="2" placeholder="Brief summary of who you are..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="profile-about">Full About Story (Displayed on your public profile page)</label>
+              <textarea class="form-input form-textarea" id="profile-about" rows="4" placeholder="Share your background, passions, and what readers can expect..."></textarea>
+            </div>
+
+            <!-- Social Media & Custom Buttons Section -->
+            <div class="profile-links-section">
+              <div class="profile-links-header">
+                <div>
+                  <h3 class="profile-links-title">Social Media & Custom Link Buttons</h3>
+                  <p class="profile-links-desc">Add social profiles (GitHub, Twitter, LinkedIn) or any custom button with a link.</p>
+                </div>
+                <button type="button" class="btn-ghost-sm" id="btn-add-profile-link">+ Add Link / Button</button>
+              </div>
+              <div class="profile-links-list" id="profile-links-list"></div>
+            </div>
+
+            <!-- Save Bar -->
+            <div class="profile-save-bar">
+              <button type="button" class="btn-publish-final" id="btn-save-profile" style="width:auto;padding:10px 28px;">Save Profile</button>
+              <span class="profile-save-status" id="profile-save-status"></span>
+            </div>
+          </div>
+
+          <!-- Cloudinary Image Hosting Card (Free Forever) -->
+          <div class="profile-card" style="margin-top: 24px;">
+            <div class="cloudinary-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 4px 0; color: var(--text);">Cloudinary Image Hosting (Free Cloud Storage)</h3>
+                <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Upload your story & cover images to Cloudinary for permanent, fast global CDN delivery.</p>
+              </div>
+              <span id="cloudinary-status-badge" style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: #e2e8f0; color: #475569;">Local Storage</span>
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+              <input type="checkbox" id="cloudinary-enabled" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--green);" />
+              <label for="cloudinary-enabled" style="font-size: 14px; font-weight: 600; color: var(--text); cursor: pointer; margin: 0;">
+                Enable Cloudinary Cloud Uploads for all Images
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="cloudinary-cloud-name">Cloud Name</label>
+              <input type="text" class="form-input" id="cloudinary-cloud-name" placeholder="e.g. dxyz123ab" />
+              <small style="color: var(--text-tertiary); font-size: 12px; display: block; margin-top: 4px;">Found in your Cloudinary Dashboard under Account Details.</small>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="cloudinary-upload-preset">Unsigned Upload Preset</label>
+              <input type="text" class="form-input" id="cloudinary-upload-preset" placeholder="e.g. medium_clone_preset" />
+              <small style="color: var(--text-tertiary); font-size: 12px; display: block; margin-top: 4px;">Created in Cloudinary Settings &gt; Upload &gt; Upload presets &gt; Add upload preset (Signing Mode: Unsigned).</small>
+            </div>
+
+            <div style="display: flex; gap: 12px; align-items: center; margin-top: 20px; flex-wrap: wrap;">
+              <button type="button" class="btn-publish-final" id="btn-save-cloudinary" style="width: auto; padding: 9px 22px;">Save Cloudinary Settings</button>
+              <button type="button" class="btn-ghost-sm" id="btn-test-cloudinary" style="padding: 9px 18px;">Test Connection</button>
+              <span id="cloudinary-save-msg" style="font-size: 13px; font-weight: 500;"></span>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ===== Editor View ===== -->
+      <main class="editor-view" id="editor-view" style="display:none">
+        <div class="editor-container">
+          <div class="editor-cover" id="editor-cover" style="display:none">
+            <img id="editor-cover-img" src="" alt="Cover" />
+            <button class="cover-remove" id="cover-remove" title="Remove cover">✕</button>
+          </div>
+          <div class="editor-match-bg-bar" id="editor-match-bg-bar" style="display:none;margin-top:10px;margin-bottom:14px;padding:8px 14px;border-radius:8px;background:var(--bg-secondary);border:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:6px;color:var(--text);">
+              <span>🖼️ Match cover image background</span>
+            </span>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;">
+              <span id="editor-match-bg-status-text" style="font-size:12px;color:var(--text-secondary);font-weight:500;">Enabled</span>
+              <input type="checkbox" id="editor-match-bg-toggle" checked style="width:16px;height:16px;cursor:pointer;accent-color:var(--green);" />
+            </label>
+          </div>
+          <div class="editor-cover-actions" id="editor-cover-actions">
+            <div class="cover-buttons-row" id="cover-buttons-row">
+              <button class="btn-add-cover" id="btn-add-cover" type="button" title="Upload cover image file">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span>Add cover image</span>
+              </button>
+              <button class="btn-add-cover" id="btn-add-cover-url" type="button" title="Add cover image from web URL">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                <span>Add from URL</span>
+              </button>
+            </div>
+            <div class="cover-url-input-bar" id="cover-url-input-bar" style="display:none;">
+              <div class="cover-url-input-wrapper">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="cover-url-icon"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                <input type="url" class="cover-url-input" id="cover-url-input" placeholder="Paste image URL (https://...) and press Enter" />
+                <button type="button" class="btn-cover-fetch" id="btn-cover-url-fetch">Fetch & Set</button>
+                <button type="button" class="btn-cover-cancel" id="btn-cover-url-cancel" title="Cancel">✕</button>
+              </div>
+            </div>
+          </div>
+          <div class="editor-title" id="editor-title" contenteditable="true" data-placeholder="Title" role="textbox" aria-label="Post title"></div>
+          <div class="editor-subtitle" id="editor-subtitle" contenteditable="true" data-placeholder="Tell your story..." role="textbox" aria-label="Post subtitle"></div>
+          <div class="editor-content" id="editor-content" contenteditable="true" data-placeholder="Write your story..." role="textbox" aria-label="Post content"></div>
+        </div>
+
+        <!-- Floating Toolbar -->
+        <div class="floating-toolbar" id="floating-toolbar">
+          <button class="toolbar-btn" data-command="bold" title="Bold (Ctrl+B)"><strong>B</strong></button>
+          <button class="toolbar-btn" data-command="italic" title="Italic (Ctrl+I)"><em>I</em></button>
+          <span class="toolbar-divider"></span>
+          <button class="toolbar-btn" data-command="h2" title="Heading"><span style="font-size:14px;font-weight:800;">H<sub style="font-size:9px">1</sub></span></button>
+          <button class="toolbar-btn" data-command="h3" title="Sub-heading"><span style="font-size:12px;font-weight:700;">H<sub style="font-size:8px">2</sub></span></button>
+          <span class="toolbar-divider"></span>
+          <button class="toolbar-btn" data-command="blockquote" title="Quote">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>
+          </button>
+          <button class="toolbar-btn" data-command="link" title="Link (Ctrl+K)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </button>
+          <button class="toolbar-btn" data-command="code" title="Inline Code">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </button>
+          <button class="toolbar-btn" data-command="strikethrough" title="Strikethrough"><s>S</s></button>
+        </div>
+
+        <!-- Side Toolbar (+) -->
+        <div class="side-toolbar" id="side-toolbar">
+          <button class="side-toolbar-toggle" id="side-toolbar-toggle" title="Add content">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          </button>
+          <div class="side-toolbar-menu" id="side-toolbar-menu">
+            <button class="side-menu-item" data-action="image">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span>Image</span>
+            </button>
+            <button class="side-menu-item" data-action="unsplash">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 2h10v6H7z"/><path d="M2 10h6v12H2z"/><path d="M16 10h6v12h-6z"/><path d="M8 16h8v6H8z"/></svg>
+              <span>Unsplash</span>
+            </button>
+            <button class="side-menu-item" data-action="video">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <span>Video</span>
+            </button>
+            <button class="side-menu-item" data-action="codeblock">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              <span>Code</span>
+            </button>
+            <button class="side-menu-item" data-action="quote">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>
+              <span>Quote</span>
+            </button>
+            <button class="side-menu-item" data-action="divider">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>Divider</span>
+            </button>
+            <button class="side-menu-item" data-action="embed">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              <span>Embed Link</span>
+            </button>
+            <button class="side-menu-item" data-action="table">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+              <span>Table</span>
+            </button>
+          </div>
+        </div>
+      </main>
+
+      <!-- ===== Unsplash Modal ===== -->
+      <div class="unsplash-modal-overlay" id="unsplash-modal">
+        <div class="unsplash-modal">
+          <div class="unsplash-header">
+            <h2>Search Unsplash</h2>
+            <button class="modal-close" id="unsplash-close">✕</button>
+          </div>
+          <div class="unsplash-search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" id="unsplash-search-input" placeholder="Search free high-resolution photos..." autocomplete="off" />
+          </div>
+          <div class="unsplash-grid" id="unsplash-grid">
+            <div class="unsplash-hint">Search for photos above to get started</div>
+          </div>
+          <p class="unsplash-credit">Photos from <a href="https://unsplash.com" target="_blank" rel="noopener">Unsplash</a></p>
+        </div>
+      </div>
+
+      <!-- ===== Prompt Modal (reusable for video/embed URL) ===== -->
+      <div class="prompt-modal-overlay" id="prompt-modal">
+        <div class="prompt-modal">
+          <h3 id="prompt-modal-title">Enter URL</h3>
+          <p id="prompt-modal-desc">Paste a URL below</p>
+          <input type="text" class="form-input" id="prompt-modal-input" placeholder="https://..." autocomplete="off" />
+          <div class="prompt-modal-actions">
+            <button class="btn-draft" id="prompt-cancel">Cancel</button>
+            <button class="btn-publish-final" id="prompt-confirm" style="width:auto;padding:10px 24px;">Insert</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Publish Modal ===== -->
+      <div class="modal-overlay" id="modal-overlay">
+        <div class="publish-modal" id="publish-modal">
+          <button class="modal-close" id="modal-close">✕</button>
+          <div class="publish-layout">
+            <div class="publish-preview">
+              <h3 class="publish-section-title">Story Preview</h3>
+              <div class="preview-card">
+                <div class="preview-cover" id="publish-preview-cover">
+                  <span class="preview-cover-placeholder">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    Add cover image
+                  </span>
+                </div>
+                <!-- Controls for Cover Image in Story Preview -->
+                <div class="publish-cover-bar" id="publish-cover-bar">
+                  <div class="publish-cover-buttons" id="publish-cover-buttons">
+                    <button type="button" class="btn-publish-cover-action" id="btn-publish-upload-cover" title="Upload cover image file">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                      Upload image
+                    </button>
+                    <button type="button" class="btn-publish-cover-action" id="btn-publish-url-cover" title="Add cover image from URL">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                      Add from URL
+                    </button>
+                    <button type="button" class="btn-publish-cover-action danger" id="btn-publish-remove-cover" style="display:none;" title="Remove cover image">
+                      ✕ Remove
+                    </button>
+                  </div>
+                  <div class="publish-cover-url-input-box" id="publish-cover-url-input-box" style="display:none;">
+                    <div class="publish-url-field-wrap">
+                      <input type="url" class="publish-url-input-field" id="publish-cover-url-input" placeholder="Paste image URL (https://...)" />
+                      <button type="button" class="btn-publish-fetch" id="btn-publish-fetch-url">Fetch & Set</button>
+                      <button type="button" class="btn-publish-cancel-url" id="btn-publish-cancel-url" title="Cancel">✕</button>
+                    </div>
+                  </div>
+                </div>
+                <h2 class="preview-title" id="publish-preview-title" contenteditable="true" data-placeholder="Preview title">Title</h2>
+                <p class="preview-subtitle" id="publish-preview-subtitle" contenteditable="true" data-placeholder="Preview description...">Subtitle</p>
+              </div>
+            </div>
+            <div class="publish-settings">
+              <h3 class="publish-section-title" id="publish-settings-heading">Publishing to <strong>Stories</strong></h3>
+              <p class="publish-hint">Review story details and tags before publishing.</p>
+              
+              <div class="form-group">
+                <label class="form-label">Title</label>
+                <input class="form-input" type="text" id="publish-title-input" placeholder="Story title..." />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Subtitle / Excerpt</label>
+                <input class="form-input" type="text" id="publish-subtitle-input" placeholder="Story description..." />
+              </div>
+
+              <div class="form-group tag-form-group">
+                <label class="form-label" for="publish-tag-input">Tags</label>
+                <div class="publish-tags-wrapper" id="publish-tags-wrapper">
+                  <div class="publish-tags-chips" id="publish-tags-chips"></div>
+                  <input type="text" class="publish-tag-input" id="publish-tag-input" placeholder="Type a tag..." autocomplete="off" />
+                </div>
+                <div class="tag-suggestions-popup" id="tag-suggestions-popup" style="display:none;"></div>
+                <span class="tag-hint-text">Type to search or create tags. Press Enter or comma to add. "java" and "Java" are automatically combined.</span>
+                <input type="hidden" id="publish-tags" />
+              </div>
+
+              <div class="form-group" style="padding: 11px 14px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border-light); margin-bottom: 20px;">
+                <label for="publish-match-bg" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin:0;">
+                  <div>
+                    <div style="font-weight:600;font-size:13.5px;color:var(--text);display:flex;align-items:center;gap:6px;">
+                      <span>🖼️ Match cover image background</span>
+                    </div>
+                    <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">
+                      Tint story background, cards, and atmosphere from cover image for readers
+                    </div>
+                  </div>
+                  <input type="checkbox" id="publish-match-bg" checked style="width:18px;height:18px;cursor:pointer;accent-color:var(--green);" />
+                </label>
+              </div>
+
+              <div class="publish-actions">
+                <button class="btn-publish-final" id="btn-publish-now">Publish now</button>
+                <button class="btn-draft" id="btn-save-draft">Save as draft</button>
+                <a id="btn-view-live" href="#" target="_blank" class="btn-ghost-sm" style="display:none;justify-content:center;margin-top:4px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                  View live on blog
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Medium-Style Sign in with email Modal (Image 1) ===== -->
+      <div class="modal-overlay login-overlay" id="login-modal-overlay">
+        <div class="login-modal medium-login-card" id="login-modal">
+          <button class="modal-close login-modal-close-btn" id="login-modal-close" aria-label="Close">✕</button>
+          <div class="medium-login-body">
+            <div class="login-flying-mail-icon">
+              <svg width="60" height="60" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M14 36L18 34" stroke-linecap="round"/>
+                <path d="M12 41L21 38" stroke-linecap="round"/>
+                <g transform="rotate(-15 36 32)">
+                  <rect x="18" y="16" width="36" height="24" rx="2" stroke="currentColor" fill="none" stroke-width="1.8"/>
+                  <path d="M18 16L36 30L54 16" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M18 40L31 28" stroke="currentColor" stroke-width="1.4"/>
+                  <path d="M54 40L41 28" stroke="currentColor" stroke-width="1.4"/>
+                </g>
+              </svg>
+            </div>
+            
+            <h2 class="medium-login-title">Sign in with email</h2>
+
+            <form id="login-form" class="medium-login-form">
+              <div class="medium-form-group">
+                <label class="medium-input-label" for="login-email">Your email</label>
+                <div class="medium-input-wrapper">
+                  <input type="email" class="medium-email-input" id="login-email" placeholder="Enter your email address" required autocomplete="email" />
+                  <span class="medium-input-badge">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f9b6c" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                  </span>
+                </div>
+              </div>
+
+              <div class="medium-form-group" style="margin-top: 14px;">
+                <label class="medium-input-label" for="login-password">Password</label>
+                <div class="medium-input-wrapper">
+                  <input type="password" class="medium-email-input" id="login-password" placeholder="Enter your password" required autocomplete="current-password" />
+                  <span class="medium-input-badge" id="btn-toggle-login-password" style="cursor: pointer;" title="Show/hide password">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </span>
+                </div>
+              </div>
+
+              <label class="medium-remember-row">
+                <input type="checkbox" id="login-remember" checked />
+                <span class="medium-checkbox-box">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span class="medium-remember-text">Remember me for faster sign in</span>
+              </label>
+
+              <div class="medium-btn-row">
+                <button type="submit" class="btn-medium-continue" id="btn-login-continue">Continue</button>
+              </div>
+              <p style="font-size: 12px; color: var(--text-secondary); text-align: center; margin-top: 10px;">
+                Protected author access (Default: <code>kushal@blog.com</code> / <code>admin123</code>)
+              </p>
+
+              <div class="medium-back-link">
+                <button type="button" class="btn-back-signin" id="link-back-signin">Back to sign in options</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      <!-- ===== Project Add/Edit Modal ===== -->
+      <div class="prompt-modal-overlay" id="project-modal-overlay">
+        <div class="prompt-modal" style="max-width: 540px; width: 100%;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+            <h3 id="project-modal-heading" style="margin:0; font-size:18px;">Add New Project</h3>
+            <button class="modal-close" id="project-modal-close" type="button">✕</button>
+          </div>
+          <form id="project-form">
+            <input type="hidden" id="modal-proj-id" value="" />
+            <div class="form-group" style="margin-bottom: 14px;">
+              <label class="form-label" for="modal-proj-title">Project Title *</label>
+              <input type="text" class="form-input" id="modal-proj-title" placeholder="e.g. Distributed Task Queue" required />
+            </div>
+            <div class="form-group" style="margin-bottom: 14px;">
+              <label class="form-label" for="modal-proj-desc">Description</label>
+              <textarea class="form-input form-textarea" id="modal-proj-desc" rows="3" placeholder="Brief summary of the project, architecture, or features..."></textarea>
+            </div>
+            <div class="form-group" style="margin-bottom: 14px;">
+              <label class="form-label" for="modal-proj-tech">Tech Stack (comma separated)</label>
+              <input type="text" class="form-input" id="modal-proj-tech" placeholder="e.g. Node.js, Redis, Docker, TypeScript" />
+            </div>
+            <div class="form-group" style="margin-bottom: 14px;">
+              <label class="form-label" for="modal-proj-github">GitHub Repository URL</label>
+              <input type="url" class="form-input" id="modal-proj-github" placeholder="https://github.com/username/repo" />
+            </div>
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label class="form-label" for="modal-proj-live">Live Demo / Website URL</label>
+              <input type="url" class="form-input" id="modal-proj-live" placeholder="https://myproject.com (optional)" />
+            </div>
+            <div style="margin-bottom: 20px;">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px;">
+                <input type="checkbox" id="modal-proj-featured" />
+                <span>★ Feature this project on top</span>
+              </label>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:12px;">
+              <button type="button" class="btn-draft" id="btn-cancel-project-modal">Cancel</button>
+              <button type="submit" class="btn-publish-final" style="width:auto; padding:10px 24px;">Save Project</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Hidden inputs -->
+      <input type="file" id="import-file-input" accept=".md,.markdown,.html,.htm" style="display:none" />
+      <input type="file" id="editor-image-input" accept="image/*" style="display:none" />
+      <input type="file" id="editor-cover-input" accept="image/*" style="display:none" />
+      <input type="file" id="publish-cover-input" accept="image/*" style="display:none" />
+
+      <!-- Toast -->
+      <div class="toast-container" id="toast-container"></div>
+
+      <!-- Table Cell Mini Toolbar -->
+      <div class="table-cell-toolbar" id="table-cell-toolbar">
+        <button type="button" class="tcell-btn" data-cmd="bold" title="Bold"><strong>B</strong></button>
+        <button type="button" class="tcell-btn" data-cmd="italic" title="Italic"><em>I</em></button>
+        <span class="tcell-divider"></span>
+        <button type="button" class="tcell-btn" data-cmd="createLink" title="Link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </button>
+        <button type="button" class="tcell-btn" data-cmd="removeFormat" title="Clear Formatting">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <script type="module" src="/scripts/editor.js"></script>
+  </body>
+</html>

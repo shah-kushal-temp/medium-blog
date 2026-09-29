@@ -1,0 +1,66 @@
+{
+  "githubUsername": "jetbrains",
+  "showGithubLink": false,
+  "projects": [
+    {
+      "id": "proj-1790688132506",
+      "title": "intellij-community",
+      "description": "IntelliJ IDEA & IntelliJ Platform",
+      "techStack": [
+        "Java",
+        "code-editor",
+        "ide",
+        "intellij",
+        "intellij-community",
+        "intellij-platform"
+      ],
+      "githubUrl": "https://github.com/JetBrains/intellij-community",
+      "liveUrl": "https://jetbrains.com/idea",
+      "stars": 20596,
+      "featured": false,
+      "createdAt": "2026-09-29T13:22:12.506Z"
+    },
+    {
+      "id": "proj-1790688090314",
+      "title": "intellij-sdk-docs",
+      "description": "IntelliJ SDK Platform Documentation",
+      "techStack": [
+        "Markdown",
+        "docs",
+        "intellij",
+        "intellij-platform",
+        "intellij-plugin",
+        "intellijidea-plugin",
+        "jetbrains",
+        "sdk"
+      ],
+      "githubUrl": "https://github.com/JetBrains/intellij-sdk-docs",
+      "liveUrl": "https://plugins.jetbrains.com/docs/intellij/",
+      "stars": 1291,
+      "featured": false,
+      "createdAt": "2026-09-29T13:21:30.314Z"
+    },
+    {
+      "id": "proj-1790688069337",
+      "title": "kotlin",
+      "description": "The Kotlin Programming Language. ",
+      "techStack": [
+        "Kotlin",
+        "compiler",
+        "gradle-plugin",
+        "intellij-plugin",
+        "kotlin",
+        "kotlin-library",
+        "maven-plugin",
+        "programming-language",
+        "wasm",
+        "webassembly"
+      ],
+      "githubUrl": "https://github.com/JetBrains/kotlin",
+      "liveUrl": "https://kotlinlang.org",
+      "stars": 53459,
+      "featured": false,
+      "createdAt": "2026-09-29T13:21:09.337Z"
+    }
+  ]
+}
