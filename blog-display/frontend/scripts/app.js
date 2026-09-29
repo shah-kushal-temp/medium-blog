@@ -419,7 +419,7 @@ function initAuth() {
       if (dropInitials) dropInitials.textContent = initials;
 
       if (p.avatar) {
-        const src = p.avatar.startsWith('http') ? p.avatar : `http://localhost:3002${p.avatar}`;
+        const src = getImageUrl(p.avatar);
         if (navImg) {
           navImg.src = src;
           navImg.style.display = 'block';

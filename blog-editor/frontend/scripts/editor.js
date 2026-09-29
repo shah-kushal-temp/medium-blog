@@ -9,6 +9,12 @@ function getEditorBackendUrl(path) {
   return `${base}${path.startsWith('/') ? '' : '/'}${path}`;
 }
 
+function getReaderLiveUrl(path = '') {
+  const base = window.__READER_URL__ || localStorage.getItem('kushal_reader_live_url') || (['localhost', '127.0.0.1'].includes(window.location.hostname) ? 'http://localhost:5173' : window.location.origin);
+  if (!path) return base;
+  return `${base.replace(/\/$/, '')}/#/post/${path}`;
+}
+
 // ============ State ============
 let posts = [];
 let currentPostId = null;
@@ -105,7 +111,7 @@ const publishPreviewCover = document.getElementById('publish-preview-cover');
 
 function updateCoverUI() {
   if (coverImageUrl) {
-    const src = coverImageUrl.startsWith('http') ? coverImageUrl : `http://localhost:3002${coverImageUrl}`;
+    const src = getEditorBackendUrl(coverImageUrl);
     if (editorCoverImg) editorCoverImg.src = src;
     if (editorCover) editorCover.style.display = '';
     if (editorCoverActions) editorCoverActions.style.display = 'none';
@@ -944,9 +950,7 @@ function renderCurationUI() {
     }
 
     heroPreview.style.display = 'block';
-    const coverSrc = heroPost.coverImage
-      ? (heroPost.coverImage.startsWith('http') ? heroPost.coverImage : 'http://localhost:3002' + heroPost.coverImage)
-      : '';
+    const coverSrc = heroPost.coverImage ? getEditorBackendUrl(heroPost.coverImage) : '';
 
     heroPreview.innerHTML = `
       <div style="display: flex; gap: 16px; align-items: center;">
@@ -997,9 +1001,7 @@ function renderCuratedPinnedList() {
 
   container.innerHTML = curationData.pinnedPostIds.map((id, index) => {
     const post = curationData.allPosts.find(p => p.id === id) || { id, title: 'Unknown story', published: true };
-    const coverSrc = post.coverImage
-      ? (post.coverImage.startsWith('http') ? post.coverImage : 'http://localhost:3002' + post.coverImage)
-      : '';
+    const coverSrc = post.coverImage ? getEditorBackendUrl(post.coverImage) : '';
 
     return `
       <div class="curate-pin-item">
@@ -1160,7 +1162,7 @@ function renderStories() {
     const excerpt = cleanPreview.substring(0, 160);
     const isSelected = selectedStoryIds.has(post.id);
 
-    const coverUrl = post.coverImage ? (post.coverImage.startsWith('http') ? post.coverImage : 'http://localhost:3002' + post.coverImage) : '';
+    const coverUrl = post.coverImage ? getEditorBackendUrl(post.coverImage) : '';
     const coverColor = post.coverColor || '';
 
     const heroBadge = post.isHero ? `<span class="story-item-status" style="background:#e0f2fe;color:#0284c7;font-weight:700;">👑 Hero</span>` : '';
@@ -1537,7 +1539,7 @@ editorContent.addEventListener('paste', async (e) => {
       try {
         const data = await apiUploadImage(file);
         if (data.success) {
-          const fullUrl = `http://localhost:3002${data.imageUrl}`;
+          const fullUrl = getEditorBackendUrl(data.imageUrl);
           const currentBlock = getClosestBlock();
 
           if (currentBlock && (currentBlock.tagName === 'BLOCKQUOTE' || currentBlock.closest?.('blockquote'))) {
@@ -2133,7 +2135,7 @@ document.getElementById('editor-image-input').addEventListener('change', async (
   try {
     const data = await apiUploadImage(file);
     if (data.success) {
-      const fullUrl = `http://localhost:3002${data.imageUrl}`;
+      const fullUrl = getEditorBackendUrl(data.imageUrl);
 
       // If activeQuoteForImage is targeted, insert directly inside the blockquote
       if (activeQuoteForImage && editorContent.contains(activeQuoteForImage)) {
@@ -3205,7 +3207,7 @@ async function openPublishModal() {
   if (btnsBox) btnsBox.style.display = 'flex';
 
   if (coverImageUrl) {
-    const src = coverImageUrl.startsWith('http') ? coverImageUrl : `http://localhost:3002${coverImageUrl}`;
+    const src = getEditorBackendUrl(coverImageUrl);
     coverDiv.innerHTML = `<img src="${src}" alt="Cover" />`;
     if (btnRemoveCover) btnRemoveCover.style.display = 'inline-flex';
   } else {
@@ -3236,7 +3238,7 @@ async function openPublishModal() {
     btnPublishNow.textContent = 'Save & publish changes';
     btnSaveDraft.textContent = 'Revert to draft';
     btnViewLive.style.display = 'inline-flex';
-    btnViewLive.href = `http://localhost:5173/#/post/${post.slug}`;
+    btnViewLive.href = getReaderLiveUrl(post.slug);
   } else {
     publishSettingsHeading.innerHTML = `Publishing to <strong>Stories</strong>`;
     btnPublishNow.textContent = 'Publish now';
@@ -3496,7 +3498,7 @@ async function handlePublishFetchUrl() {
     const data = await res.json();
     const finalUrl = (data.success && data.imageUrl) ? data.imageUrl : url;
     coverImageUrl = finalUrl;
-    const src = finalUrl.startsWith('http') ? finalUrl : `http://localhost:3002${finalUrl}`;
+    const src = getEditorBackendUrl(finalUrl);
     if (publishPreviewCover) {
       publishPreviewCover.innerHTML = `<img src="${src}" alt="Cover" />`;
     }
@@ -3552,7 +3554,7 @@ if (publishCoverInput) {
       const data = await apiUploadImage(file);
       if (data.success) {
         coverImageUrl = data.imageUrl;
-        const src = `http://localhost:3002${data.imageUrl}`;
+        const src = getEditorBackendUrl(data.imageUrl);
         if (publishPreviewCover) {
           publishPreviewCover.innerHTML = `<img src="${src}" alt="Cover" />`;
         }
@@ -3624,7 +3626,7 @@ btnPublishNow.addEventListener('click', async () => {
     closePublishModal();
     saveStatus.textContent = 'Published';
     btnPublishNav.textContent = 'Update';
-    showToast('Story published! 🎉', 'View story', `http://localhost:5173/#/post/${slug}`);
+    showToast('Story published! 🎉', 'View story', getReaderLiveUrl(slug));
   } catch (err) {
     console.error('Publish error:', err);
     showToast(`Failed to publish: ${err.message || 'Server error'}`);
@@ -3798,7 +3800,7 @@ function updateProfileAvatarUI() {
   if (dropTagline) dropTagline.textContent = profileTagline?.value || profileData?.tagline || 'Author & Engineer';
 
   if (currentProfileAvatar) {
-    const src = currentProfileAvatar.startsWith('http') ? currentProfileAvatar : `http://localhost:3002${currentProfileAvatar}`;
+    const src = getEditorBackendUrl(currentProfileAvatar);
     if (profileAvatarImg) {
       profileAvatarImg.src = src;
       profileAvatarImg.style.display = 'block';
@@ -4769,6 +4771,8 @@ if (projSwitcher) {
 
 // ============ Initialize ============
 initTheme();
+const topnavBlogLink = document.getElementById('topnav-view-blog-link');
+if (topnavBlogLink) topnavBlogLink.href = getReaderLiveUrl();
 initAuth();
 initViewSwitcher();
 initCloudinaryUI();
