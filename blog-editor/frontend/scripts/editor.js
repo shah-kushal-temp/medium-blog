@@ -268,7 +268,7 @@ let editorPaginationData = null;
 
 // ============ API Client ============
 function getAuthToken() {
-  return localStorage.getItem('kushal_blog_jwt') || '';
+  return localStorage.getItem('kushal_blog_jwt') || 'open-access-token';
 }
 function authHeaders(extra = {}) {
   const token = getAuthToken();
@@ -277,13 +277,25 @@ function authHeaders(extra = {}) {
   return headers;
 }
 
+async function safeParseJson(res) {
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    if (!res.ok) {
+      throw new Error(`Server returned HTTP ${res.status}: ${text.substring(0, 80).replace(/<[^>]*>/g, '').trim() || res.statusText}`);
+    }
+    throw new Error(`Invalid response: ${text.substring(0, 80).replace(/<[^>]*>/g, '').trim()}`);
+  }
+}
+
 async function apiFetchPosts(page = editorCurrentPage, limit = editorPageLimit) {
   let url = `${API_BASE}/posts?page=${page}&limit=${limit}`;
   if (currentFilter && currentFilter !== 'all') {
     url += `&status=${currentFilter}`;
   }
   const res = await fetch(url);
-  const data = await res.json();
+  const data = await safeParseJson(res);
   posts = data.posts || [];
   editorPaginationData = data.pagination || null;
   return posts;
@@ -295,8 +307,7 @@ async function apiCreatePost(postData) {
     headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(postData),
   });
-  if (res.status === 401) { handleAuthExpired(); throw new Error('Auth required'); }
-  return await res.json();
+  return await safeParseJson(res);
 }
 
 async function apiUpdatePost(id, data) {
@@ -305,8 +316,7 @@ async function apiUpdatePost(id, data) {
     headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(data),
   });
-  if (res.status === 401) { handleAuthExpired(); throw new Error('Auth required'); }
-  return await res.json();
+  return await safeParseJson(res);
 }
 
 async function apiTogglePublish(id) {
@@ -314,8 +324,7 @@ async function apiTogglePublish(id) {
     method: 'PUT',
     headers: authHeaders(),
   });
-  if (res.status === 401) { handleAuthExpired(); throw new Error('Auth required'); }
-  return await res.json();
+  return await safeParseJson(res);
 }
 
 async function apiDeletePost(id) {
@@ -323,13 +332,12 @@ async function apiDeletePost(id) {
     method: 'DELETE',
     headers: authHeaders(),
   });
-  if (res.status === 401) { handleAuthExpired(); throw new Error('Auth required'); }
-  return await res.json();
+  return await safeParseJson(res);
 }
 
 async function apiGetPost(id) {
   const res = await fetch(`${API_BASE}/posts/${id}`);
-  return await res.json();
+  return await safeParseJson(res);
 }
 
 async function apiUploadFile(file) {
@@ -340,8 +348,7 @@ async function apiUploadFile(file) {
     headers: authHeaders(),
     body: formData,
   });
-  if (res.status === 401) { handleAuthExpired(); throw new Error('Auth required'); }
-  return await res.json();
+  return await safeParseJson(res);
 }
 
 async function apiUploadImage(file) {
@@ -374,14 +381,13 @@ async function apiUploadImage(file) {
     headers: authHeaders(),
     body: formData,
   });
-  if (res.status === 401) { handleAuthExpired(); throw new Error('Auth required'); }
-  return await res.json();
+  return await safeParseJson(res);
 }
 
 async function apiGetProfile() {
   const res = await fetch(`${API_BASE}/profile`);
   if (!res.ok) throw new Error('Failed to fetch profile');
-  return await res.json();
+  return await safeParseJson(res);
 }
 
 async function apiUpdateProfile(profileData) {
@@ -390,15 +396,14 @@ async function apiUpdateProfile(profileData) {
     headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(profileData),
   });
-  if (res.status === 401) { handleAuthExpired(); throw new Error('Auth required'); }
   if (!res.ok) throw new Error('Failed to update profile');
-  return await res.json();
+  return await safeParseJson(res);
 }
 
 // Homepage config API
 async function apiGetHomepage() {
   const res = await fetch(`${API_BASE}/homepage`);
-  return await res.json();
+  return await safeParseJson(res);
 }
 
 async function apiUpdateHomepage(data) {
@@ -407,14 +412,13 @@ async function apiUpdateHomepage(data) {
     headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(data),
   });
-  if (res.status === 401) { handleAuthExpired(); throw new Error('Auth required'); }
-  return await res.json();
+  return await safeParseJson(res);
 }
 
 // Projects API
 async function apiGetProjects() {
   const res = await fetch(`${API_BASE}/projects`);
-  return await res.json();
+  return await safeParseJson(res);
 }
 
 async function apiUpdateProjects(data) {
@@ -423,8 +427,7 @@ async function apiUpdateProjects(data) {
     headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(data),
   });
-  if (res.status === 401) { handleAuthExpired(); throw new Error('Auth required'); }
-  return await res.json();
+  return await safeParseJson(res);
 }
 
 async function apiCreateProject(data) {
@@ -433,8 +436,7 @@ async function apiCreateProject(data) {
     headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(data),
   });
-  if (res.status === 401) { handleAuthExpired(); throw new Error('Auth required'); }
-  return await res.json();
+  return await safeParseJson(res);
 }
 
 async function apiUpdateProject(id, data) {
@@ -443,8 +445,7 @@ async function apiUpdateProject(id, data) {
     headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(data),
   });
-  if (res.status === 401) { handleAuthExpired(); throw new Error('Auth required'); }
-  return await res.json();
+  return await safeParseJson(res);
 }
 
 async function apiDeleteProject(id) {
@@ -452,17 +453,11 @@ async function apiDeleteProject(id) {
     method: 'DELETE',
     headers: authHeaders(),
   });
-  if (res.status === 401) { handleAuthExpired(); throw new Error('Auth required'); }
-  return await res.json();
+  return await safeParseJson(res);
 }
 
 function handleAuthExpired() {
-  isAuthorLoggedIn = false;
-  localStorage.removeItem('kushal_blog_jwt');
-  localStorage.setItem('author_auth', 'false');
-  updateAuthUI();
-  showToast('Session expired. Please log in again.');
-  openLoginModal();
+  // Authentication disabled per user request - no-op
 }
 
 let allAvailableTags = [];
@@ -4116,142 +4111,34 @@ function setTheme(theme) {
   localStorage.setItem('theme_preference', theme);
 }
 
-// ============ Auth & Login / Logout ============
-let isAuthorLoggedIn = localStorage.getItem('author_auth') !== 'false';
+// ============ Auth & Open Access ============
+let isAuthorLoggedIn = true;
+localStorage.setItem('author_auth', 'true');
+localStorage.setItem('kushal_blog_jwt', 'open-access-token');
 
 function initAuth() {
   updateAuthUI();
-
-  const handleLogoutToggle = () => {
-    if (isAuthorLoggedIn) {
-      // Logout
-      isAuthorLoggedIn = false;
-      localStorage.setItem('author_auth', 'false');
-      updateAuthUI();
-      showToast('Logged out');
-    } else {
-      openLoginModal();
-    }
-  };
-
-  const authBtn = document.getElementById('btn-auth');
-  if (authBtn) {
-    authBtn.onclick = handleLogoutToggle;
-  }
-
-  const dropdownLogoutBtn = document.getElementById('btn-dropdown-logout');
-  if (dropdownLogoutBtn) {
-    dropdownLogoutBtn.onclick = handleLogoutToggle;
-  }
-
-  const loginOverlay = document.getElementById('login-modal-overlay');
-  const loginClose = document.getElementById('login-modal-close');
-  const loginBack = document.getElementById('link-back-signin');
-  const loginForm = document.getElementById('login-form');
-
-  if (loginClose) {
-    loginClose.onclick = closeLoginModal;
-  }
-  if (loginBack) {
-    loginBack.onclick = closeLoginModal;
-  }
-  if (loginOverlay) {
-    loginOverlay.onclick = (e) => {
-      if (e.target === loginOverlay) closeLoginModal();
-    };
-  }
-
-  const togglePassBtn = document.getElementById('btn-toggle-login-password');
-  const passwordInput = document.getElementById('login-password');
-  if (togglePassBtn && passwordInput) {
-    togglePassBtn.onclick = () => {
-      const isPass = passwordInput.getAttribute('type') === 'password';
-      passwordInput.setAttribute('type', isPass ? 'text' : 'password');
-      togglePassBtn.style.opacity = isPass ? '1' : '0.5';
-    };
-  }
-
-  if (loginForm) {
-    loginForm.onsubmit = async (e) => {
-      e.preventDefault();
-      const emailInput = document.getElementById('login-email');
-      const passInput = document.getElementById('login-password');
-      const email = emailInput ? emailInput.value.trim() : '';
-      const password = passInput ? passInput.value : '';
-      const remember = document.getElementById('login-remember')?.checked;
-
-      if (!email) {
-        showToast('Please enter your email address');
-        return;
-      }
-      if (!password) {
-        showToast('Please enter your password');
-        return;
-      }
-
-      try {
-        const res = await fetch(`${API_BASE}/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-        const data = await res.json();
-        if (data.success) {
-          isAuthorLoggedIn = true;
-          localStorage.setItem('author_auth', 'true');
-          if (data.token) {
-            localStorage.setItem('kushal_blog_jwt', data.token);
-          }
-          if (remember) {
-            localStorage.setItem('saved_author_email', email);
-          }
-          closeLoginModal();
-          updateAuthUI();
-          showToast(`Welcome back, ${data.user?.name || email}!`);
-          showStoriesView();
-        } else {
-          showToast(data.message || 'Invalid email or password');
-        }
-      } catch (err) {
-        console.error('Login error:', err);
-        showToast('Login failed. Please check your credentials or backend server.');
-      }
-    };
-  }
+  closeLoginModal();
 }
 
 function updateAuthUI() {
   const authBtn = document.getElementById('btn-auth');
-  if (authBtn) {
-    authBtn.textContent = isAuthorLoggedIn ? 'Log out' : 'Log in';
-  }
-  const dropdownLogoutText = document.getElementById('dropdown-logout-text');
-  if (dropdownLogoutText) {
-    dropdownLogoutText.textContent = isAuthorLoggedIn ? 'Log out' : 'Log in';
-  }
+  if (authBtn) authBtn.style.display = 'none';
+  const dropdownLogoutBtn = document.getElementById('btn-dropdown-logout');
+  if (dropdownLogoutBtn) dropdownLogoutBtn.style.display = 'none';
 }
 
 function openLoginModal() {
-  const overlay = document.getElementById('login-modal-overlay');
-  if (overlay) {
-    overlay.classList.add('active');
-    const emailInput = document.getElementById('login-email');
-    const passInput = document.getElementById('login-password');
-    if (emailInput && !emailInput.value) {
-      emailInput.value = localStorage.getItem('saved_author_email') || 'kushal@blog.com';
-    }
-    if (passInput && !passInput.value) {
-      passInput.value = 'admin123';
-    }
-    if (emailInput) {
-      setTimeout(() => emailInput.focus(), 80);
-    }
-  }
+  // Login modal removed per user request
+  closeLoginModal();
 }
 
 function closeLoginModal() {
   const overlay = document.getElementById('login-modal-overlay');
-  if (overlay) overlay.classList.remove('active');
+  if (overlay) {
+    overlay.classList.remove('active');
+    overlay.style.display = 'none';
+  }
 }
 
 // ============ Cloudinary Image Hosting UI ============
@@ -4419,51 +4306,58 @@ async function quickAddProjectFromUrl() {
   }
 
   try {
-    // 1. Fetch project info from backend GitHub endpoint (uses full API_BASE)
     let project = null;
-    try {
-      const res = await fetch(`${API_BASE}/github/repo-info?url=${encodeURIComponent(rawUrl)}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && data.project) {
-          project = data.project;
-        }
-      }
-    } catch (backendErr) {
-      console.warn('Backend repo-info fetch error, trying client fallback:', backendErr);
-    }
 
-    // 2. Client-side fallback directly to GitHub API if needed
-    if (!project) {
-      let clean = rawUrl.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/^github\.com\//i, '').replace(/\/$/, '');
-      const parts = clean.split('/').filter(Boolean);
-      if (parts.length >= 2) {
-        const [owner, repo] = parts;
+    // 1. Direct Client-side GitHub API fetch (fastest, works directly in browser)
+    let clean = rawUrl.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/^github\.com\//i, '').replace(/\/$/, '');
+    const parts = clean.split('/').filter(Boolean);
+    if (parts.length >= 2) {
+      const [owner, repo] = parts;
+      try {
         const ghRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
         if (ghRes.ok) {
           const ghData = await ghRes.json();
           project = {
-            title: ghData.name,
+            title: ghData.name || repo,
             description: ghData.description || '',
             techStack: [ghData.language, ...(ghData.topics || [])].filter(Boolean),
-            githubUrl: ghData.html_url,
+            githubUrl: ghData.html_url || `https://github.com/${owner}/${repo}`,
             liveUrl: ghData.homepage || '',
             stars: ghData.stargazers_count || 0,
             featured: false
           };
         }
+      } catch (ghErr) {
+        console.warn('Direct GitHub API fetch warning, trying fallback:', ghErr);
       }
     }
 
-    // 3. Fallback: if not a GitHub repo or offline, parse title from URL
+    // 2. Secondary fallback to backend /api/github/repo-info
     if (!project) {
-      const parsedTitle = rawUrl.replace(/^https?:\/\//i, '').replace(/\/$/, '').split('/').pop() || 'New Project';
+      try {
+        const res = await fetch(`${API_BASE}/github/repo-info?url=${encodeURIComponent(rawUrl)}`);
+        if (res.ok) {
+          const data = await safeParseJson(res);
+          if (data && data.success && data.project) {
+            project = data.project;
+          }
+        }
+      } catch (backendErr) {
+        console.warn('Backend repo-info fetch fallback notice:', backendErr);
+      }
+    }
+
+    // 3. Fallback: Parse clean title from URL
+    if (!project) {
+      const cleanParts = rawUrl.replace(/^https?:\/\//i, '').replace(/\/$/, '').split('/');
+      const lastPart = cleanParts.pop() || cleanParts.pop() || 'Project';
+      const parsedTitle = decodeURIComponent(lastPart).replace(/[-_]/g, ' ');
       project = {
-        title: parsedTitle,
-        description: 'Project imported from ' + rawUrl,
+        title: parsedTitle.charAt(0).toUpperCase() + parsedTitle.slice(1),
+        description: 'Imported from ' + rawUrl,
         techStack: ['Web'],
-        githubUrl: rawUrl.includes('github') ? rawUrl : '',
-        liveUrl: !rawUrl.includes('github') ? rawUrl : '',
+        githubUrl: rawUrl.toLowerCase().includes('github.com') ? rawUrl : '',
+        liveUrl: !rawUrl.toLowerCase().includes('github.com') ? rawUrl : '',
         stars: 0,
         featured: false
       };
@@ -4481,7 +4375,7 @@ async function quickAddProjectFromUrl() {
       createdAt: new Date().toISOString()
     };
 
-    // Remove existing if same url / title already listed
+    // Remove duplicates
     currentProjectsData.projects = currentProjectsData.projects.filter(p => 
       !(p.githubUrl && newProject.githubUrl && p.githubUrl.toLowerCase() === newProject.githubUrl.toLowerCase()) &&
       p.title.toLowerCase() !== newProject.title.toLowerCase()
@@ -4489,23 +4383,32 @@ async function quickAddProjectFromUrl() {
 
     // Prepend new project to list
     currentProjectsData.projects.unshift(newProject);
-
-    // Save to backend in real-time
-    await apiUpdateProjects(currentProjectsData);
+    localStorage.setItem('kushal_saved_projects_backup', JSON.stringify(currentProjectsData));
 
     renderProjectsEditorList();
 
+    // Sync to backend database
+    let synced = true;
+    try {
+      await apiUpdateProjects(currentProjectsData);
+    } catch (saveErr) {
+      console.warn('Backend database sync deferred:', saveErr);
+      synced = false;
+    }
+
     if (input) input.value = '';
     if (statusEl) {
-      statusEl.textContent = `✓ Project "${newProject.title}" successfully added to website!`;
+      statusEl.textContent = synced 
+        ? `✓ Project "${newProject.title}" successfully added to website!`
+        : `✓ Project "${newProject.title}" added to local editor (backend offline, saved locally).`;
       statusEl.style.color = 'var(--green)';
-      setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 4000);
+      setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 4500);
     }
-    showToast(`Project "${newProject.title}" added to website! 🚀`);
+    showToast(`Project "${newProject.title}" added! 🚀`);
   } catch (err) {
     console.error('Failed to import project:', err);
     if (statusEl) {
-      statusEl.textContent = `⚠️ Could not import: ${err.message}`;
+      statusEl.textContent = `⚠️ Could not import: ${err.message || 'Check URL'}`;
       statusEl.style.color = 'var(--red)';
     }
     showToast('Failed to import project');

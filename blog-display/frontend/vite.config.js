@@ -5,7 +5,7 @@ export default defineConfig({
   publicDir: false,
   server: {
     port: 5173,
-    open: true,
+    open: false,
   },
   build: {
     outDir: 'dist',

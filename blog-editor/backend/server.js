@@ -24,20 +24,9 @@ const JWT_EXPIRES_IN = '7d';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'kushal@blog.com';
 const ADMIN_PASSWORD_HASH = bcrypt.hashSync(process.env.ADMIN_PASSWORD || 'admin123', 10);
 
-// Auth middleware - protects write endpoints
+// Auth middleware - disabled / bypassed per user request so all operations work freely without login
 function requireAuth(req, res, next) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Authentication required. Please log in.' });
-  }
-  const token = authHeader.split(' ')[1];
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (err) {
-    return res.status(401).json({ error: 'Invalid or expired token. Please log in again.' });
-  }
+  next();
 }
 
 // Paths
