@@ -22,7 +22,13 @@ function getEditorBackendUrl(path) {
 }
 
 function getReaderLiveUrl(path = '') {
-  const base = window.__READER_URL__ || localStorage.getItem('kushal_reader_live_url') || (['localhost', '127.0.0.1'].includes(window.location.hostname) ? 'http://localhost:5173' : window.location.origin);
+  let base = window.__READER_URL__ 
+    || (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_READER_URL)
+    || localStorage.getItem('kushal_reader_live_url');
+
+  if (!base) {
+    base = 'http://localhost:5173';
+  }
   if (!path) return base;
   return `${base.replace(/\/$/, '')}/#/post/${path}`;
 }
@@ -3849,6 +3855,10 @@ function renderProfileForm(p) {
   currentProfileAvatar = p.avatar || '';
   updateProfileAvatarUI();
   renderProfileLinks(p.links || []);
+  const readerUrlInput = document.getElementById('profile-reader-url');
+  if (readerUrlInput) {
+    readerUrlInput.value = localStorage.getItem('kushal_reader_live_url') || (['localhost', '127.0.0.1'].includes(window.location.hostname) ? 'http://localhost:5173' : '');
+  }
 }
 
 function updateProfileAvatarUI() {
@@ -4098,6 +4108,12 @@ async function saveProfile() {
 
   try {
     if (profileSaveStatus) profileSaveStatus.textContent = 'Saving...';
+    const readerUrlInput = document.getElementById('profile-reader-url');
+    if (readerUrlInput && readerUrlInput.value.trim()) {
+      localStorage.setItem('kushal_reader_live_url', readerUrlInput.value.trim());
+      const topLink = document.getElementById('topnav-view-blog-link');
+      if (topLink) topLink.href = getReaderLiveUrl();
+    }
     const res = await apiUpdateProfile(payload);
     if (res.success) {
       if (profileSaveStatus) {
@@ -4747,7 +4763,20 @@ if (projSwitcher) {
 // ============ Initialize ============
 initTheme();
 const topnavBlogLink = document.getElementById('topnav-view-blog-link');
-if (topnavBlogLink) topnavBlogLink.href = getReaderLiveUrl();
+if (topnavBlogLink) {
+  topnavBlogLink.href = getReaderLiveUrl();
+  topnavBlogLink.addEventListener('click', () => {
+    let target = getReaderLiveUrl();
+    if (!['localhost', '127.0.0.1'].includes(window.location.hostname) && !localStorage.getItem('kushal_reader_live_url')) {
+      const entered = prompt('Enter your public reader blog website URL (e.g. https://your-reader.vercel.app or http://localhost:5173):', 'http://localhost:5173');
+      if (entered && entered.trim()) {
+        localStorage.setItem('kushal_reader_live_url', entered.trim());
+        target = getReaderLiveUrl();
+      }
+    }
+    topnavBlogLink.href = target;
+  });
+}
 initAuth();
 initViewSwitcher();
 initCloudinaryUI();

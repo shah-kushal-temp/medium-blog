@@ -3,7 +3,16 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/medium_clone';
+function formatMongoUri(raw) {
+  if (!raw) return 'mongodb://127.0.0.1:27017/medium_clone';
+  let uri = raw.trim();
+  if (uri.includes('@@')) {
+    uri = uri.replace('@@', '%40@');
+  }
+  return uri;
+}
+
+const MONGODB_URI = formatMongoUri(process.env.MONGODB_URI);
 
 // Post Schema
 const PostSchema = new mongoose.Schema({
